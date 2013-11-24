@@ -22,17 +22,17 @@ MainWindow::MainWindow(QString path, QWidget *parent) :
     image = QImage::fromData(buffer,"JPG");
     ui->setupUi(this);
     updateImage();
-    analyzedPixels = new bool* [image.width() ];
+    analyzedPixels = new short* [image.width() ];
     for (int i = 0; i < image.width(); i++)
     {
-        analyzedPixels[i] = new bool  [image.height()];
+        analyzedPixels[i] = new short  [image.height()];
         for (int j = 0; j <  image.height(); j++)
         {
-            analyzedPixels[i][j] = false;
+            analyzedPixels[i][j] = 0;
         }
     }
 
-    trashHold = 40;
+    trashHold = 20;
 }
 
 MainWindow::~MainWindow()
@@ -47,15 +47,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    /*
+
     analyze(0,0,qRgb(0,0,0));
     for (int i = 0; i < image.width(); i++)
         for (int j = 0; j < image.height(); j++)
-            analyzedPixels[i][j]=false;
-    */
-    analyze(0,0,qRgb(0,0,0));
-    analyze();
+            analyzedPixels[i][j]=0;
+    analyze2(0,0,qRgb(0,0,0));
+//    analyze();
     markBoundaryPixels();
+    for (int i = 0; i < image.width(); i++)
+        for (int j = 0; j < image.height(); j++)
+            analyzedPixels[i][j]=0;
     updateImage();
 }
 
@@ -91,7 +93,7 @@ int MainWindow::max(int a, int b)
 
 void MainWindow::analyze(int x, int y, QRgb previousValue)
 {
-    analyzedPixels[x][y] = true;
+    analyzedPixels[x][y]++;
     QRgb value = image.pixel(x,y);
     if (abs(qRed(value) - qRed(previousValue)) > trashHold ||
         abs(qGreen(value) - qGreen(previousValue)) > trashHold ||
@@ -100,13 +102,15 @@ void MainWindow::analyze(int x, int y, QRgb previousValue)
         boundaryPixels.push_back(QPair<int,int>(x,y));
     }
 
-    if ((y + 1) < image.height() && !analyzedPixels[x][y + 1]) analyze(x, y + 1, value);
-    if ((x + 1) < image.width()  && !analyzedPixels[x + 1][y]) analyze(x + 1, y, value);
+    if ((y + 1) < image.height() && analyzedPixels[x][y + 1] != 2) analyze(x, y + 1, value);
+    if ((x + 1) < image.width()  && analyzedPixels[x + 1][y] != 2) analyze(x + 1, y, value);
+
 }
 
 void MainWindow::analyze2(int x, int y, QRgb previousValue)
 {
-    analyzedPixels[x][y] = true;
+    analyzedPixels[x][y]++;
+    //qDebug() << analyzedPixels[x][y];
     QRgb value = image.pixel(x,y);
     if (abs(qRed(value) - qRed(previousValue)) > trashHold ||
         abs(qGreen(value) - qGreen(previousValue)) > trashHold ||
@@ -115,10 +119,11 @@ void MainWindow::analyze2(int x, int y, QRgb previousValue)
         boundaryPixels.push_back(QPair<int,int>(x,y));
     }
 
-    if ((x + 1) < image.width()  && !analyzedPixels[x + 1][y]) analyze(x + 1, y, value);
-    if ((y + 1) < image.height() && !analyzedPixels[x][y + 1]) analyze(x, y + 1, value);
-
+    if ((x + 1) < image.width()  && analyzedPixels[x + 1][y] != 2) analyze2(x + 1, y, value);
+    if ((y + 1) < image.height() && analyzedPixels[x][y + 1] != 2) analyze2(x, y + 1, value);
 }
+
+
 
 void MainWindow::analyze()
 {

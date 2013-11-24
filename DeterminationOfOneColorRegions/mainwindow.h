@@ -28,7 +28,7 @@ private:
     void markBoundaryPixels();
     Ui::MainWindow *ui;
     QImage image;
-    bool** analyzedPixels;
+    short** analyzedPixels;
     QFile source;
     int trashHold;
     QVector<QPair<int,int> > boundaryPixels;

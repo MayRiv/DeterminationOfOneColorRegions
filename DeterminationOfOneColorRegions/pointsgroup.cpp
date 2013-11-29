@@ -1,5 +1,5 @@
 #include "pointsgroup.h"
-
+#include <QDebug>
 PointsGroup::PointsGroup()
 {
     averageColour = qRgb(0,0,0);
@@ -12,18 +12,32 @@ QRgb PointsGroup::getGroupColour()
 
 void PointsGroup::addPoint(int x, int y, QRgb pointColour)
 {
-    if (points.contains(QPair<int,int>(x,y)))
+    if (points.contains(QPair<int,int>(x,y)) || second.contains(QPair<int,int>(x,y)))
         return;
     if (points.size() > 0)
     {
-        //averegeColour = (averegeColour * points.size() + pointColour) / (points.size() + 1);
-        QRgb red = qRed(averageColour) * ((float)points.size() / (points.size() + 1)) + qRed(pointColour) / (points.size() + 1);
-        QRgb green = qGreen(averageColour) * ((float)points.size() / (points.size() + 1)) + qGreen(pointColour) / (points.size() + 1);
-        QRgb blue = qBlue(averageColour)  * ((float)points.size() / (points.size() + 1)) + qBlue(pointColour) / (points.size() + 1);
+        int firstSize  = points.size();
+        int secondSize = second.size();
+        //int thirdSize  = third.size();
+        //int foursSize  = fours.size();
+        unsigned long int sum = firstSize + secondSize ;//+ thirdSize + foursSize;
+        QRgb red = qRed(averageColour) * ((float)sum / (sum + 1)) + (float)qRed(pointColour) / (sum + 1);
+        QRgb green = qGreen(averageColour) * ((float)sum / (sum + 1)) + (float)qGreen(pointColour) / (sum + 1);
+        QRgb blue = qBlue(averageColour)  * ((float)sum / (sum + 1)) + (float)qBlue(pointColour) / (sum + 1);
         averageColour = qRgb(red,green,blue);
     }
     else averageColour = pointColour;
-    points.push_back(QPair<int,int>(x,y));
+    if (points.size() < 62000) points.push_back(QPair<int,int>(x,y));
+    /*else
+    if (second.size() < 62000) second.push_back(QPair<int,int>(x,y));
+    else
+    if (third.size()  < 62000) third.push_back(QPair<int,int>(x,y));
+    else
+    if (third.size()  < 62000) fours.push_back(QPair<int,int>(x,y));
+    else
+    {
+        qDebug() << "Jopa";
+    }*/
 }
 
 bool PointsGroup::isDiffirent(QRgb value, int trashHold)

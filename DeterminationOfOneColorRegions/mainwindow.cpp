@@ -40,7 +40,7 @@ MainWindow::MainWindow(QString path, QWidget *parent) :
             analyzedPixelsHorizontal[i][j] = false;
         }
     }
-    trashHold = 30;
+    trashHold = 20;
 
 }
 

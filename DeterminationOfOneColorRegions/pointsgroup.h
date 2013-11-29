@@ -12,6 +12,9 @@ public:
     bool isDiffirent(QRgb value, int trashHold);
 private:
     QVector<QPair<int,int> > points;
+    QVector<QPair<int,int> > second;
+    QVector<QPair<int,int> > third;
+    QVector<QPair<int,int> > fours;
     QRgb averageColour;
 };
 

@@ -9,6 +9,8 @@
 #include <QVector>
 #include <QPair>
 #include <QFileDialog>
+
+//#include "pointsgroup.h"
 MainWindow::MainWindow(QString path, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -27,18 +29,18 @@ MainWindow::MainWindow(QString path, QWidget *parent) :
     ui->setupUi(this);
     updateImage();
     analyzedPixelsVertical = new bool* [image.width() ];
-        analyzedPixelsHorizontal = new bool* [image.width() ];
-        for (int i = 0; i < image.width(); i++)
+    analyzedPixelsHorizontal = new bool* [image.width() ];
+    for (int i = 0; i < image.width(); i++)
+    {
+        analyzedPixelsVertical[i] = new bool  [image.height()];
+        analyzedPixelsHorizontal[i] = new bool  [image.height()];
+        for (int j = 0; j <  image.height(); j++)
         {
-            analyzedPixelsVertical[i] = new bool  [image.height()];
-            analyzedPixelsHorizontal[i] = new bool  [image.height()];
-            for (int j = 0; j <  image.height(); j++)
-            {
-                analyzedPixelsVertical[i][j] = false;
-                analyzedPixelsHorizontal[i][j] = false;
-            }
+            analyzedPixelsVertical[i][j] = false;
+            analyzedPixelsHorizontal[i][j] = false;
         }
-    trashHold = 20;
+    }
+    trashHold = 30;
 
 }
 
@@ -60,7 +62,10 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 
-    analyze(0,0,qRgb(0,0,0));
+    //analyze(0,0,qRgb(0,0,0));
+    PointsGroup* group = new PointsGroup;
+    groups.push_back(group);
+    analyze(0,0,group);
     markBoundaryPixels();
     updateImage();
 }
@@ -69,11 +74,6 @@ void MainWindow::updateImage()
 {
     ui->label->setPixmap(QPixmap::fromImage(image));
 
-}
-
-void MainWindow::openImage()
-{
-    qDebug() << "Worked.";
 }
 
 void MainWindow::line(int x1, int y1, int x2, int y2, QRgb color)
@@ -108,6 +108,7 @@ void MainWindow::analyze(int x, int y, QRgb previousValue)
         abs(qBlue(value) - qBlue(previousValue)) > trashHold)
     {
         boundaryPixels.push_back(QPair<int,int>(x,y));
+        analyzedPixelsHorizontal[x][y] = analyzedPixelsVertical[x][y] = true;
     }
 
     if ((x + 1) < image.width()  && !analyzedPixelsHorizontal[x + 1][y])
@@ -178,4 +179,31 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
+}
+
+
+void MainWindow::analyze(int x, int y,PointsGroup* pointsGroup )
+{
+    QRgb value = image.pixel(x,y);
+    PointsGroup* myGroup = pointsGroup;
+    if (pointsGroup->isDiffirent(value,trashHold))
+    {
+        boundaryPixels.push_back(QPair<int,int>(x,y));
+        analyzedPixelsHorizontal[x][y] = analyzedPixelsVertical[x][y] = true;
+        myGroup = new PointsGroup;
+        myGroup->addPoint(x,y,value);
+        groups.push_back(myGroup);
+    }
+    else myGroup->addPoint(x,y,value);
+
+    if ((x + 1) < image.width()  && !analyzedPixelsHorizontal[x + 1][y])
+    {
+        analyzedPixelsHorizontal[x + 1][y] = true;
+        analyze(x + 1, y, myGroup);
+    }
+    if ((y + 1) < image.height() && !analyzedPixelsVertical[x][y + 1])
+    {
+        analyzedPixelsVertical[x][y + 1] = true;
+        analyze(x, y + 1, myGroup);
+    }
 }

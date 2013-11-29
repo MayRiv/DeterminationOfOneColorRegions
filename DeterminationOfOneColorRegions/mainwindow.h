@@ -19,6 +19,11 @@ public:
 private slots:
     void on_pushButton_clicked();
     void updateImage();
+    void openImage();
+    void on_actionOpen_triggered();
+
+    void on_actionExit_triggered();
+
 private:
     void line(int x1,int y1,int x2,int y2, QRgb color);
     int max(int a, int b);

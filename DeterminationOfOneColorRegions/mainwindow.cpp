@@ -8,11 +8,15 @@
 #include <QRgb>
 #include <QVector>
 #include <QPair>
+#include <QFileDialog>
 MainWindow::MainWindow(QString path, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     source(path)
 { 
+    analyzedPixelsVertical   = 0;
+    analyzedPixelsHorizontal = 0;
+
     qDebug() << path;
     //source = new QFile(path);
     if (!source.open(QIODevice::ReadOnly))
@@ -23,18 +27,19 @@ MainWindow::MainWindow(QString path, QWidget *parent) :
     ui->setupUi(this);
     updateImage();
     analyzedPixelsVertical = new bool* [image.width() ];
-    analyzedPixelsHorizontal = new bool* [image.width() ];
-    for (int i = 0; i < image.width(); i++)
-    {
-        analyzedPixelsVertical[i] = new bool  [image.height()];
-        analyzedPixelsHorizontal[i] = new bool  [image.height()];
-        for (int j = 0; j <  image.height(); j++)
+        analyzedPixelsHorizontal = new bool* [image.width() ];
+        for (int i = 0; i < image.width(); i++)
         {
-            analyzedPixelsVertical[i][j] = false;
-            analyzedPixelsHorizontal[i][j] = false;
+            analyzedPixelsVertical[i] = new bool  [image.height()];
+            analyzedPixelsHorizontal[i] = new bool  [image.height()];
+            for (int j = 0; j <  image.height(); j++)
+            {
+                analyzedPixelsVertical[i][j] = false;
+                analyzedPixelsHorizontal[i][j] = false;
+            }
         }
-    }
     trashHold = 20;
+
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +69,11 @@ void MainWindow::updateImage()
 {
     ui->label->setPixmap(QPixmap::fromImage(image));
 
+}
+
+void MainWindow::openImage()
+{
+    qDebug() << "Worked.";
 }
 
 void MainWindow::line(int x1, int y1, int x2, int y2, QRgb color)
@@ -123,4 +133,49 @@ void MainWindow::markBoundaryPixels()
 
 
 
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    source.close();
+    boundaryPixels.clear();
+    if (analyzedPixelsVertical && analyzedPixelsHorizontal)
+    {
+        for (int i = 0; i < image.width(); i++)
+        {
+            delete analyzedPixelsVertical[i];
+            delete analyzedPixelsHorizontal[i];
+        }
+        delete[] analyzedPixelsVertical;
+        delete[] analyzedPixelsHorizontal;
+        analyzedPixelsVertical   = 0;
+        analyzedPixelsHorizontal = 0;
+    }
+    QString path = QFileDialog::getOpenFileName(this,"Open an image your want to mark","../");
+    source.setFileName(path);
+    if (!source.open(QIODevice::ReadOnly))
+        qDebug() << QString("Can't open %1.").arg(path);
+    QByteArray buffer = source.readAll();
+    image = QImage::fromData(buffer,"JPG");
+
+    analyzedPixelsVertical = new bool* [image.width() ];
+    analyzedPixelsHorizontal = new bool* [image.width() ];
+    for (int i = 0; i < image.width(); i++)
+    {
+        analyzedPixelsVertical[i] = new bool  [image.height()];
+        analyzedPixelsHorizontal[i] = new bool  [image.height()];
+        for (int j = 0; j <  image.height(); j++)
+        {
+            analyzedPixelsVertical[i][j] = false;
+            analyzedPixelsHorizontal[i][j] = false;
+        }
+    }
+
+
+    updateImage();
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
 }

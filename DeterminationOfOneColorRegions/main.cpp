@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    //MainWindow w("D:\\git\\DeterminationOfOneColorRegions\\test.jpg");
+    //MainWindow w("D:\\git\\DeterminationOfOneColorRegions\\test2.jpg");
     MainWindow w("/media/D/git/DeterminationOfOneColorRegions/test.jpg");
     w.show();
 

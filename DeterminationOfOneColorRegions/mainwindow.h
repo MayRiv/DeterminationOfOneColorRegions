@@ -23,15 +23,15 @@ private:
     void line(int x1,int y1,int x2,int y2, QRgb color);
     int max(int a, int b);
     void analyze(int x, int y, QRgb previousValue);
-    void analyze2(int x, int y, QRgb previousValue);
-    void analyze();
     void markBoundaryPixels();
     Ui::MainWindow *ui;
     QImage image;
-    short** analyzedPixels;
+    bool** analyzedPixelsVertical;
+    bool** analyzedPixelsHorizontal;
     QFile source;
     int trashHold;
     QVector<QPair<int,int> > boundaryPixels;
+    QVector<QPair<QPair<int,int>,QRgb > > nextPixels;
 };
 
 #endif // MAINWINDOW_H

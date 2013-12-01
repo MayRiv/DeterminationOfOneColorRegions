@@ -13,8 +13,7 @@ public:
 private:
     QVector<QPair<int,int> > points;
     QVector<QPair<int,int> > second;
-    QVector<QPair<int,int> > third;
-    QVector<QPair<int,int> > fours;
+    QVector<QVector<QPair<int,int> >* > pointsTest;
     QRgb averageColour;
 };
 
